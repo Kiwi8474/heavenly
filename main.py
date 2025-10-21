@@ -91,6 +91,10 @@ def calculate_currencies(current_courses, currency_totals):
         current_value = new_courses[currency]
 
         current_supply = currency_totals[currency]
+
+        if current_supply == 0:
+            current_supply = IDEAL_SUPPLY
+
         supply_ratio = current_supply / IDEAL_SUPPLY
         inflation_factor = supply_ratio ** INFLATION_EXPONENT
 
@@ -151,6 +155,7 @@ async def on_ready():
     print(f"Eingeloggt als {bot.user} (ID: {bot.user.id})")
     load_all_files()
     bot.loop.create_task(currency_update_loop())
+    bot.loop.create_task(reward_voice_loop())
     print("Bot ist einsatzbereit")
     print("-----")
 
