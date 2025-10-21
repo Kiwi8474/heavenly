@@ -44,13 +44,13 @@ CURRENCIES_DISPLAY = {
 BASE_CURRENCY_NAME = "aetherium"
 BASE_CURRENCY_VALUE = 1.0
 VOLATILE_CURRENCIES = ["celesti", "solari", "glimmer"]
-IDEAL_SUPPLY = 100000
-INFLATION_EXPONENT = 0.1
-UPDATE_INTERVAL = 5 * 60 # Intervall für die Währungsupdates. 5 Minuten in Sekunden
+IDEAL_SUPPLY = 5_000_000
+INFLATION_EXPONENT = 0.025
+UPDATE_INTERVAL = 1 * 60 # Intervall für die Währungsupdates. 1 Minuten in Sekunden
 
 # Voice Belohnungen
 VOICE_REWARD_INTERVAL = 1 * 60
-AETHERIUM_REWARD_PER_VOICE_INTERVAL = 0.01666
+AETHERIUM_REWARD_PER_VOICE_INTERVAL = (1 / 60) / 10 # 0.1 Aetherium pro Stunde pro Person
 
 
 # --- Dateien ---
