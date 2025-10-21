@@ -50,7 +50,7 @@ UPDATE_INTERVAL = 1 * 60 # Intervall für die Währungsupdates. 1 Minuten in Sek
 
 # Voice Belohnungen
 VOICE_REWARD_INTERVAL = 1 * 60
-AETHERIUM_REWARD_PER_VOICE_INTERVAL = (1 / 60) / 10 # 0.1 Aetherium pro Stunde pro Person
+AETHERIUM_REWARD_PER_VOICE_INTERVAL = 0.01 # 0.6 Aetherium pro Stunde pro Person
 
 
 # --- Dateien ---
