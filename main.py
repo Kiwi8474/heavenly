@@ -11,7 +11,7 @@ import time
 
 # Celesti = Währung für Voice & Chat Aktivität
 # Solari = Währung für Glücksspiel
-# Aetherium = Seltene Währung für besondere Anlässe
+# Aetherium = Seltene Währung für besondere Anlässe und Fixpunkt für die Währungskurse
 # Glimmer = Währung für D&D
 
 
