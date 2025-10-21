@@ -85,7 +85,7 @@ def save_all_files():
 
 def calculate_currencies(current_courses, currency_totals):
     new_courses = current_courses.copy()
-    MAX_CHANGE_PERCENT = 1
+    MAX_CHANGE_PERCENT = 0.20
 
     for currency in VOLATILE_CURRENCIES:
         current_value = new_courses[currency]
@@ -101,8 +101,13 @@ def calculate_currencies(current_courses, currency_totals):
         max_abs_change = current_value * MAX_CHANGE_PERCENT
         change_amount = random.uniform(-max_abs_change, max_abs_change)
 
+        if inflation_factor < 0.001:
+            inflation_factor = 0.001
+
         final_change = change_amount / inflation_factor
         new_value = current_value + final_change
+
+        new_courses[currency] = round(max(0.01, new_value), 2)
     
     return new_courses
 
@@ -128,6 +133,7 @@ async def reward_voice_loop():
         await asyncio.sleep(VOICE_REWARD_INTERVAL)
 
         celesti_to_aetherium = dicts["currency_courses"]["celesti"]
+        if celesti_to_aetherium < 0.01: celesti_to_aetherium = 0.01
 
         for member in heavenly_area.members:
             if member.voice and member.voice.channel and not member.bot:
@@ -136,7 +142,11 @@ async def reward_voice_loop():
                 if member.voice.self_mute or member.voice.self_deaf:
                     continue
 
-                celesti_reward = AETHERIUM_REWARD_PER_VOICE_INTERVAL / celesti_to_aetherium
+                celesti_reward_float = AETHERIUM_REWARD_PER_VOICE_INTERVAL / celesti_to_aetherium
+                celesti_reward = round(celesti_reward_float, 2)
+
+                if celesti_reward < 0.01:
+                    continue
 
                 user_id = str(member.id)
 
@@ -146,6 +156,9 @@ async def reward_voice_loop():
                         dicts["user_currencies"][user_id][user_currency] = 0
 
                 dicts["user_currencies"][user_id]["celesti"] += celesti_reward
+                dicts["currency_totals"]["celesti"] += celesti_reward
+
+                save_all_files()
 
 
 # --- Events ---
@@ -183,7 +196,7 @@ async def fill(ctx, amnt: int):
         return
 
     dicts["pot"]["solari"] += amnt
-    dicts["currency_totals"]["solari"]
+    dicts["currency_totals"]["solari"] += amnt
 
     await ctx.send(f"Der Pot wurde mit {amnt} Solari gefüllt und beträgt nun {dicts["pot"]["solari"]}.")
 
@@ -286,7 +299,7 @@ async def balance(ctx, user: discord.Member=None):
     text = f"Währungen von {user.display_name}\n"
 
     for user_currency in dicts["user_currencies"][user_id]:
-        text += f"{dicts["user_currencies"][user_id][user_currency]} {CURRENCIES_DISPLAY[user_currency]}\n"
+        text += f"{dicts["user_currencies"][user_id][user_currency]:.2f} {CURRENCIES_DISPLAY[user_currency]}\n"
 
     await ctx.send(text)
 
@@ -311,6 +324,71 @@ async def bot_help(ctx):
     cmds += "`coinflip / cf` : Spielt eine Runde Coinflip\n"
 
     await ctx.author.send(cmds)
+
+@bot.command(name="transfer", description="Überträgt eine Währung von deinem Konto auf das eines anderen Users.")
+async def transfer(ctx, user: discord.Member, crncy: str, amnt: int):
+    currency = crncy.lower()
+    amnt = float(amnt)
+
+    if user is None:
+        await ctx.send("Du musst einen User angeben.")
+        return
+
+    if crncy is None:
+        await ctx.send("Du musst eine Währung angeben.")
+        return
+    
+    if amnt is None:
+        await ctx.send("Du musst eine Anzahl angeben.")
+        return
+
+    if currency not in CURRENCIES:
+        await ctx.send("Diese Währung gibt es nicht.")
+        return
+    
+    if amnt <= 1.0:
+        await ctx.send("Der Mindestbetrag liegt bei 1.")
+        return
+
+    source_user_id = str(ctx.author.id)
+    target_user_id = str(user.id)
+
+    if source_user_id not in dicts["user_currencies"]:
+        dicts["user_currencies"][source_user_id] = {}
+        for user_currency in CURRENCIES_FILE_USE:
+            dicts["user_currencies"][source_user_id][user_currency] = 0
+
+    if target_user_id not in dicts["user_currencies"]:
+        dicts["user_currencies"][target_user_id] = {}
+        for user_currency in CURRENCIES_FILE_USE:
+            dicts["user_currencies"][target_user_id][user_currency] = 0
+
+    if amnt > dicts["user_currencies"][source_user_id][currency]:
+        await ctx.send(f"Du hast ungenügend {CURRENCIES_DISPLAY[currency]}.")
+        return
+
+
+    total_debit = round(amnt, 2) # Überweisung
+
+    tax_amount_float = amnt * 0.1
+    tax_amount = round(tax_amount_float, 2) # Geldvernichtungssteuer
+
+    amount_received = round(amnt - tax_amount, 2) # Betrag an den Empfänger
+
+    # Transaktion
+    dicts["user_currencies"][source_user_id][currency] -= total_debit
+    dicts["user_currencies"][target_user_id][currency] += amount_received
+
+    # Geld vernichten (muhahahahaha!)
+    dicts["currency_totals"][currency] -= tax_amount
+
+    await ctx.send(
+        f"{ctx.author.display_name} hat {total_debit:.2f} {CURRENCIES_DISPLAY[currency]} gesendet.\n"
+        f"{user.display_name} hat {amount_received:.2f} {CURRENCIES_DISPLAY[currency]} erhalten.\n"
+        f"{tax_amount:.2f} {CURRENCIES_DISPLAY[currency]} wurden aufgrund der Geldvernichtungssteuer versteuert."
+    )
+
+    save_all_files()
 
 
 # Glücksspielbefehle
@@ -341,9 +419,11 @@ async def coinflip(ctx, bet: int, choice: str):
 
     if random_choice == user_choice:
         dicts["user_currencies"][user_id]["solari"] += bet
+        dicts["pot"]["solari"] -= bet
         await ctx.send(f"Du hast {user_choice.title()} gewählt und gewonnen.\nDu erhältst {bet} Solari.")
     else:
         dicts["user_currencies"][user_id]["solari"] -= bet
+        dicts["pot"]["solari"] += bet
         await ctx.send(f"Du hast {user_choice.title()} gewählt und verloren.\nDu verlierst {bet} Solari")
 
     save_all_files()
