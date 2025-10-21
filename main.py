@@ -46,7 +46,7 @@ BASE_CURRENCY_VALUE = 1.0
 VOLATILE_CURRENCIES = ["celesti", "solari", "glimmer"]
 IDEAL_SUPPLY = 100000
 INFLATION_EXPONENT = 0.1
-UPDATE_INTERVAL = 1 * 60 * 60 # Intervall für die Währungsupdates. 1 Stunde in Sekunden
+UPDATE_INTERVAL = 5 * 60 # Intervall für die Währungsupdates. 5 Minuten in Sekunden
 
 # Voice Belohnungen
 VOICE_REWARD_INTERVAL = 1 * 60
