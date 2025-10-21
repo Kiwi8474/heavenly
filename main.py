@@ -155,8 +155,12 @@ async def reward_voice_loop():
                     for user_currency in CURRENCIES_FILE_USE:
                         dicts["user_currencies"][user_id][user_currency] = 0
 
-                dicts["user_currencies"][user_id]["celesti"] += celesti_reward
-                dicts["currency_totals"]["celesti"] += celesti_reward
+                
+                current_celesti = dicts["user_currencies"][user_id]["celesti"]
+                dicts["user_currencies"][user_id]["celesti"] = round(current_celesti + celesti_reward, 2)
+                
+                current_totals = dicts["currency_totals"]["celesti"]
+                dicts["currency_totals"]["celesti"] = round(current_totals + celesti_reward, 2)
 
                 save_all_files()
 
