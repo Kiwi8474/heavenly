@@ -209,15 +209,25 @@ async def shutdown(ctx):
 
 @bot.command(name="fill", description="Füllt den Pot.")
 @commands.check(lambda ctx: ctx.author.id in BOT_ADMINS)
-async def fill(ctx, amnt: int):
+async def fill(ctx, crncy: str, amnt: int):
+    currency = crncy.lower()
+
     if amnt is None:
         await ctx.send("Du musst eine Anzahl angeben.")
         return
+    
+    if crncy is None:
+        await ctx.send("Du musst eine Währung angeben.")
+        return
+    
+    if currency not in CURRENCIES:
+        await ctx.send("Diese Währung gibt es nicht.")
+        return
 
-    dicts["pot"]["solari"] += amnt
-    dicts["currency_totals"]["solari"] += amnt
+    dicts["pot"][currency] += amnt
+    dicts["currency_totals"][currency] += amnt
 
-    await ctx.send(f"Der Pot wurde mit {amnt} Solari gefüllt und beträgt nun {dicts["pot"]["solari"]}.")
+    await ctx.send(f"Der Pot wurde mit {amnt} {CURRENCIES_DISPLAY[currency]} gefüllt und beträgt nun {dicts["pot"][currency]} {CURRENCIES_DISPLAY[currency]}.")
 
     save_all_files()
 
@@ -230,7 +240,7 @@ async def give(ctx, user: discord.Member, crncy: str, amnt: int):
         await ctx.send("Du musst einen User angeben.")
         return
 
-    if currency is None:
+    if crncy is None:
         await ctx.send("Du musst eine Währung angeben.")
         return
     
@@ -301,7 +311,11 @@ async def ping(ctx):
 
 @bot.command(name="pot", description="Zeigt den aktuellen Pot.", aliases=["p"])
 async def pot(ctx):
-    await ctx.send(f"Der aktuelle Pot liegt bei {dicts["pot"]["solari"]}")
+    text = f"Der aktuelle Pot liegt bei"
+    for currency in CURRENCIES_FILE_USE:
+        text += f"\n{dicts["pot"][currency]} {CURRENCIES_DISPLAY[currency]}"
+
+    await ctx.send(text)
 
 @bot.command(name="balance", description="Zeigt alle Währungen eines Users an.", aliases=["bal"])
 async def balance(ctx, user: discord.Member=None):
