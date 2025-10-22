@@ -45,6 +45,7 @@ BASE_CURRENCY_NAME = "aetherium"
 BASE_CURRENCY_VALUE = 1.0
 VOLATILE_CURRENCIES = ["celesti", "solari", "glimmer"]
 IDEAL_SUPPLY = 5_000_000
+AETHERIUM_IDEAL_SUPPLY = 1000
 INFLATION_EXPONENT = 0.025
 UPDATE_INTERVAL = 1 * 60 # Intervall für die Währungsupdates. 1 Minuten in Sekunden
 
@@ -87,6 +88,18 @@ def calculate_currencies(current_courses, currency_totals):
     new_courses = current_courses.copy()
     MAX_CHANGE_PERCENT = 0.20
 
+    aeth_supply = currency_totals[BASE_CURRENCY_NAME]
+    if aeth_supply == 0:
+        aeth_supply = AETHERIUM_IDEAL_SUPPLY
+
+    aeth_supply_ratio = aeth_supply / AETHERIUM_IDEAL_SUPPLY
+
+    AETH_EXPONENT = 0.01 
+    aeth_shortage_factor = aeth_supply_ratio ** AETH_EXPONENT
+
+    if aeth_shortage_factor < 0.01:
+        aeth_shortage_factor = 0.01
+
     for currency in VOLATILE_CURRENCIES:
         current_value = new_courses[currency]
 
@@ -101,8 +114,10 @@ def calculate_currencies(current_courses, currency_totals):
         max_abs_change = current_value * MAX_CHANGE_PERCENT
         change_amount = random.uniform(-max_abs_change, max_abs_change)
 
-        if inflation_factor < 0.001:
-            inflation_factor = 0.001
+        inflation_factor = inflation_factor / aeth_shortage_factor
+
+        if inflation_factor < 0.01:
+            inflation_factor = 0.01
 
         final_change = change_amount / inflation_factor
         new_value = current_value + final_change
@@ -393,6 +408,10 @@ async def transfer(ctx, user: discord.Member, crncy: str, amnt: int):
     )
 
     save_all_files()
+
+@bot.command(name="exchange", description="Wechselt eine Währung zu einer anderen um.", aliases=["ex"])
+async def exchange(ctx, amnt: float, src: str, dest: str):
+    pass # TODO: muss noch exchange einbauen
 
 
 # Glücksspielbefehle
