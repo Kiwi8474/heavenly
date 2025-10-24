@@ -358,6 +358,7 @@ async def bot_help(ctx):
     cmds += "`help / hilfe / h / cmds` : Sendet eine DM mit allen Befehlen.\n"
     cmds += "`transfer` : Überträgt eine Währung von deinem Konto auf das eines anderen Users.\n"
     cmds += "`exchange` : Tauscht eine Währung basierend auf den aktuellen Kursen in eine andere Währung um.\n"
+    cmds += "`contribute` : Sendet einen Link zu meinem Github für eine freiwillige Mitentwicklung des Bots.\n"
 
     cmds += "\n## Adminbefehle\n"
     cmds += "`say` : Lässt den Bot etwas sagen.\n"
@@ -465,7 +466,7 @@ async def exchange(ctx, amnt: float=None, src: str=None, dest: str=None):
         for user_currency in CURRENCIES_FILE_USE:
             dicts["user_currencies"][user_id][user_currency] = 0
 
-    if amnt > dict["user_currencies"][user_id][src]:
+    if amnt > dicts["user_currencies"][user_id][src]:
         await ctx.send(f"Du hast ungenügend {CURRENCIES_DISPLAY[src]}.")
         return
 
@@ -477,6 +478,7 @@ async def exchange(ctx, amnt: float=None, src: str=None, dest: str=None):
     dicts["user_currencies"][user_id][src_lower] -= amnt
     dicts["user_currencies"][user_id][dest_lower] += dest_currency_amount
     dicts["currency_totals"][src_lower] -= tax_amount
+    dicts["currency_totals"][dest_lower] += dest_currency_amount
 
     save_all_files()
 
@@ -485,6 +487,16 @@ async def exchange(ctx, amnt: float=None, src: str=None, dest: str=None):
         f"{amount_after_tax:.2f} {CURRENCIES_DISPLAY[src_lower]} wurden umgerechnet.\n"
         f"Du erhältst {dest_currency_amount:.2f} {CURRENCIES_DISPLAY[dest_lower]}.\n"
         f"{tax_amount:.2f} {CURRENCIES_DISPLAY[src_lower]} wurden aufgrund der Geldvernichtungssteuer vernichtet."
+    )
+
+@bot.command(name="contribute", description="Sendet einen Link zu meinem Github für eine freiwillige Mitentwicklung des Bots.")
+async def contribute(ctx):
+    await ctx.send(
+        f"Du willst mithelfen, dass der Bot wächst?\n"
+        f"Dann bist du bei https://github.com/Kiwi8474/heavenly genau richtig.\n"
+        f"Forke einfach mein Repository, damit du deine eigene Kopie vom Bot-Code hast und ändere sie nach deinen Wünschen!\n"
+        f"Bist du fertig? Dann erstelle ein Pull Request in meinem Repository und wenn du glück hast, nehme ich deine Änderung an!\n"
+        f"Somit hilfst du mir, indem du mitmachst und der Bot wird mehr zum Communityprojekt, indem du deine wunderbaren Ideen mit einbringst!"
     )
 
 
