@@ -527,6 +527,8 @@ async def coinflip(ctx, bet: float=None, choice: str=None):
     choices = ["kopf", "zahl"]
     random_choice = random.choice(choices)
 
+    # TODO: Bei der Gewinnauszahlung und beim Füllen vom Pot handle_tax() einbauen
+
     if random_choice == user_choice:
         dicts["user_currencies"][user_id]["solari"] += bet
         dicts["pot"]["solari"] -= bet
