@@ -544,6 +544,9 @@ async def coinflip(ctx, bet: float=None, choice: str=None):
 
     save_all_files()
 
+# TODO: Glücksspiel "Slots" einbauen
+
+# Globaler Errorhandler
 
 @bot.event
 async def on_command_error(ctx, error):
