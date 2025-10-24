@@ -428,6 +428,7 @@ async def transfer(ctx, user: discord.Member=None, crncy: str=None, amnt: float=
     dicts["user_currencies"][target_user_id][currency] += amount_received
 
     # Geld vernichten (muhahahahaha!)
+    # TODO: die Zeile hierdrunter durch handle_tax() ersetzen
     dicts["currency_totals"][currency] -= tax_amount
 
     await ctx.send(
