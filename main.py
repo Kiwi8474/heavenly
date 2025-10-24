@@ -478,6 +478,8 @@ async def exchange(ctx, amnt: float=None, src: str=None, dest: str=None):
     dicts["user_currencies"][user_id][dest_lower] += dest_currency_amount
     dicts["currency_totals"][src_lower] -= tax_amount
 
+    save_all_files()
+
     await ctx.send(
         f"Du hast {amnt:.2f} {CURRENCIES_DISPLAY[src_lower]} umgetauscht.\n"
         f"{amount_after_tax:.2f} {CURRENCIES_DISPLAY[src_lower]} wurden umgerechnet.\n"
