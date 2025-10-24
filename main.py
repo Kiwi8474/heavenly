@@ -478,6 +478,7 @@ async def exchange(ctx, amnt: float=None, src: str=None, dest: str=None):
 
     dicts["user_currencies"][user_id][src_lower] -= amnt
     dicts["user_currencies"][user_id][dest_lower] += dest_currency_amount
+    # TODO: die zwei Zeilen unter diesem Kommentar durch handle_tax() ersetzen
     dicts["currency_totals"][src_lower] -= tax_amount
     dicts["currency_totals"][dest_lower] += dest_currency_amount
 
