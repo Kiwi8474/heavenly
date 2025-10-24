@@ -33,7 +33,6 @@ BOT_ADMINS = [
     1208449439170039940 # Maxi
 ]
 CURRENCIES_FILE_USE = ["celesti", "solari", "aetherium", "glimmer"]
-CURRENCIES = ["celesti", "solari", "aetherium", "ätherium", "glimmer"]
 CURRENCIES_DISPLAY = {
     "celesti": "Celesti",
     "solari": "Solari",
@@ -232,7 +231,7 @@ async def fill(ctx, crncy: str=None, amnt: float=None):
         await ctx.send("Du musst eine Währung angeben.")
         return
     
-    if currency not in CURRENCIES:
+    if currency not in CURRENCIES_FILE_USE:
         await ctx.send("Diese Währung gibt es nicht.")
         return
 
@@ -260,7 +259,7 @@ async def give(ctx, user: discord.Member=None, crncy: str=None, amnt: float=None
         await ctx.send("Du musst eine Anzahl angeben.")
         return
 
-    if currency not in CURRENCIES:
+    if currency not in CURRENCIES_FILE_USE:
         await ctx.send("Diese Währung gibt es nicht.")
         return
     
@@ -291,7 +290,7 @@ async def give(ctx, user: discord.Member=None, crncy: str=None):
         await ctx.send("Du musst eine Währung angeben.")
         return
 
-    if currency != "all" and currency not in CURRENCIES:
+    if currency != "all" and currency not in CURRENCIES_FILE_USE:
         await ctx.send("Diese Währung gibt es nicht.")
         return
 
@@ -389,7 +388,7 @@ async def transfer(ctx, user: discord.Member=None, crncy: str=None, amnt: float=
         await ctx.send("Du musst eine Anzahl angeben.")
         return
 
-    if currency not in CURRENCIES:
+    if currency not in CURRENCIES_FILE_USE:
         await ctx.send("Diese Währung gibt es nicht.")
         return
     
@@ -455,7 +454,7 @@ async def exchange(ctx, amnt: float=None, src: str=None, dest: str=None):
     src_lower = src.lower()
     dest_lower = dest.lower()
 
-    if src_lower not in CURRENCIES or dest_lower not in CURRENCIES:
+    if src_lower not in CURRENCIES_FILE_USE or dest_lower not in CURRENCIES_FILE_USE:
         await ctx.send("Diese Währung gibt es nicht.")
         return
 
