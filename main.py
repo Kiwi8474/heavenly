@@ -141,6 +141,8 @@ def update_currency_courses():
     dicts["currency_courses"] = calculate_currencies(dicts["currency_courses"], dicts["currency_totals"])
     save_all_files()
 
+# TODO: hier neue handle_tax(amount, currency) Funktion einbauen
+
 
 # --- Loops ---
 
