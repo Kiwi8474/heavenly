@@ -126,6 +126,15 @@ def calculate_currencies(current_courses, currency_totals):
     
     return new_courses
 
+def currency_to_currency(amount, src_currency, dest_currency):
+    src_currency_to_aeth = dicts["currency_courses"].get(src_currency, BASE_CURRENCY_VALUE)
+    dest_currency_to_aeth = dicts["currency_courses"].get(dest_currency, BASE_CURRENCY_VALUE)
+
+    amount_in_aeth = amount * src_currency_to_aeth
+    final_amount = amount_in_aeth / dest_currency_to_aeth
+
+    return round(final_amount, 2)
+
 def update_currency_courses():
     dicts["currency_courses"] = calculate_currencies(dicts["currency_courses"], dicts["currency_totals"])
     save_all_files()
@@ -345,6 +354,7 @@ async def bot_help(ctx):
     cmds += "`balance / bal` : Zeigt alle Währungen eines Users an.\n"
     cmds += "`help / hilfe / h / cmds` : Sendet eine DM mit allen Befehlen.\n"
     cmds += "`transfer` : Überträgt eine Währung von deinem Konto auf das eines anderen Users.\n"
+    cmds += "`exchange` : Tauscht eine Währung basierend auf den aktuellen Kursen in eine andere Währung um.\n"
 
     cmds += "\n## Adminbefehle\n"
     cmds += "`say` : Lässt den Bot etwas sagen.\n"
@@ -423,9 +433,42 @@ async def transfer(ctx, user: discord.Member, crncy: str, amnt: int):
 
     save_all_files()
 
-@bot.command(name="exchange", description="Wechselt eine Währung zu einer anderen um.", aliases=["ex"])
+@bot.command(name="exchange", description="Tauscht eine Währung basierend auf den aktuellen Kursen in eine andere Währung um.", aliases=["ex"])
 async def exchange(ctx, amnt: float, src: str, dest: str):
-    pass # TODO: muss noch exchange einbauen
+
+    if amnt is None:
+        await ctx.send("Du musst eine Anzahl angeben.")
+        return
+
+    if amnt <= 1.0:
+        await ctx.send("Der Mindestbetrag liegt bei 1.")
+        return
+
+    if src is None or dest is None:
+        await ctx.send("Du musst zwei Währungen angeben.")
+        return
+
+    if src not in CURRENCIES or dest not in CURRENCIES:
+        await ctx.send("Diese Währung gibt es nicht.")
+        return
+
+    user_id = str(ctx.author.id)
+
+    if user_id not in dicts["user_currencies"]:
+        dicts["user_currencies"][user_id] = {}
+        for user_currency in CURRENCIES_FILE_USE:
+            dicts["user_currencies"][user_id][user_currency] = 0
+
+    if amnt > dict["user_currencies"][user_id][src]:
+        await ctx.send(f"Du hast ungenügend {CURRENCIES_DISPLAY[src]}.")
+        return
+
+    dest_currency_amount = currency_to_currency(amnt, src, dest)
+
+    dicts["user_currencies"][user_id][src] -= amnt
+    dicts["user_currencies"][user_id][dest] += dest_currency_amount
+
+    await ctx.send(f"Du hast erfolgreich {amnt} {CURRENCIES_DISPLAY[src]} in {dest_currency_amount} {CURRENCIES_DISPLAY[dest]} eingetauscht.")
 
 
 # Glücksspielbefehle
@@ -464,6 +507,9 @@ async def coinflip(ctx, bet: int, choice: str):
         await ctx.send(f"Du hast {user_choice.title()} gewählt und verloren.\nDu verlierst {bet} Solari")
 
     save_all_files()
+
+
+# TODO: muss hier noch errorhandler einbauen und oben überflüssige prüfungen (if X is None:) entfernen.
 
 
 # --- Bot Start ---
