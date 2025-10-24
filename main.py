@@ -143,6 +143,8 @@ def update_currency_courses():
 
 # TODO: hier neue handle_tax(amount, currency) Funktion einbauen
 
+# TODO: hier neue ensure_user_id_exists(user_id) Funktion einbauen
+
 
 # --- Loops ---
 
@@ -178,6 +180,7 @@ async def reward_voice_loop():
 
                 user_id = str(member.id)
 
+                # TODO: diesen Codeblock durch ensure_user_id_exists(user_id) ersetzen
                 if user_id not in dicts["user_currencies"]:
                     dicts["user_currencies"][user_id] = {}
                     for user_currency in CURRENCIES_FILE_USE:
@@ -267,6 +270,7 @@ async def give(ctx, user: discord.Member=None, crncy: str=None, amnt: float=None
     
     user_id = str(user.id)
 
+    # TODO: diesen Codeblock durch ensure_user_id_exists(user_id) ersetzen
     if user_id not in dicts["user_currencies"]:
         dicts["user_currencies"][user_id] = {}
         for user_currency in CURRENCIES_FILE_USE:
@@ -299,7 +303,8 @@ async def give(ctx, user: discord.Member=None, crncy: str=None):
         return
 
     user_id = str(user.id)
-    
+
+    # TODO: diesen Codeblock durch ensure_user_id_exists(user_id) ersetzen
     if user_id not in dicts["user_currencies"]:
         dicts["user_currencies"][user_id] = {}
         for user_currency in CURRENCIES_FILE_USE:
@@ -339,6 +344,7 @@ async def balance(ctx, user: discord.Member=None):
 
     user_id = str(user.id)
 
+    # TODO: diesen Codeblock durch ensure_user_id_exists(user_id) ersetzen
     if user_id not in dicts["user_currencies"]:
         dicts["user_currencies"][user_id] = {}
         for user_currency in CURRENCIES_FILE_USE:
@@ -403,11 +409,13 @@ async def transfer(ctx, user: discord.Member=None, crncy: str=None, amnt: float=
     source_user_id = str(ctx.author.id)
     target_user_id = str(user.id)
 
+    # TODO: diesen Codeblock durch ensure_user_id_exists(user_id) ersetzen
     if source_user_id not in dicts["user_currencies"]:
         dicts["user_currencies"][source_user_id] = {}
         for user_currency in CURRENCIES_FILE_USE:
             dicts["user_currencies"][source_user_id][user_currency] = 0
 
+    # TODO: diesen Codeblock durch ensure_user_id_exists(user_id) ersetzen
     if target_user_id not in dicts["user_currencies"]:
         dicts["user_currencies"][target_user_id] = {}
         for user_currency in CURRENCIES_FILE_USE:
@@ -465,6 +473,7 @@ async def exchange(ctx, amnt: float=None, src: str=None, dest: str=None):
 
     user_id = str(ctx.author.id)
 
+    # TODO: diesen Codeblock durch ensure_user_id_exists(user_id) ersetzen
     if user_id not in dicts["user_currencies"]:
         dicts["user_currencies"][user_id] = {}
         for user_currency in CURRENCIES_FILE_USE:
@@ -519,6 +528,7 @@ async def coinflip(ctx, bet: float=None, choice: str=None):
     user_choice = choice.lower()
     user_id = str(ctx.author.id)
 
+    # TODO: diesen Codeblock durch ensure_user_id_exists(user_id) ersetzen
     if user_id not in dicts["user_currencies"]:
         dicts["user_currencies"][user_id] = {}
         for user_currency in CURRENCIES_FILE_USE:
