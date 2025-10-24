@@ -277,8 +277,10 @@ async def give(ctx, user: discord.Member=None, crncy: str=None, amnt: float=None
     save_all_files()
     await ctx.send(f"{user.display_name} hat {amnt} {CURRENCIES_DISPLAY[currency]} erhalten und hat nun {dicts["user_currencies"][user_id][currency]} {CURRENCIES_DISPLAY[currency]}.")
 
-# DIESEN BEFEHL NICHT NUTZEN! ER VERÄNDERT NICHT DIE TOTALS!
-# warum ist er dann drinne? keine ahnung.
+# DE: DIESEN BEFEHL NICHT NUTZEN! ER VERÄNDERT NICHT DIE TOTALS!
+# EN: DO NOT USE THIS COMMAND! IT DOESN'T CHANGE THE TOTALS!
+# DE: warum ist er dann drinne? keine ahnung.
+# EN: why did i program it? no idea.
 @bot.command(name="reset", description="Setzt eine Währung eines Users zurück.")
 @commands.check(lambda ctx: ctx.author.id in BOT_ADMINS)
 async def give(ctx, user: discord.Member=None, crncy: str=None):
