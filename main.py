@@ -548,6 +548,8 @@ async def coinflip(ctx, bet: float=None, choice: str=None):
 
 # TODO: Glücksspiel "Blackjack" einbauen
 
+# TODO: Glücksspiel "Tresor" einbauen. WICHTIG: Es soll in einem Embed mit Knöpfen sein
+
 
 # Globaler Errorhandler
 
