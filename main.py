@@ -53,6 +53,9 @@ UPDATE_INTERVAL = 1 * 60 # Intervall für die Währungsupdates. 1 Minuten in Sek
 VOICE_REWARD_INTERVAL = 1 * 60
 AETHERIUM_REWARD_PER_VOICE_INTERVAL = 0.01 # 0.6 Aetherium pro Stunde pro Person
 
+# Steuern
+BURNING_TAX_AMOUNT = 0.10
+
 
 # --- Dateien ---
 
@@ -218,7 +221,7 @@ async def shutdown(ctx):
 
 @bot.command(name="fill", description="Füllt den Pot.")
 @commands.check(lambda ctx: ctx.author.id in BOT_ADMINS)
-async def fill(ctx, crncy: str, amnt: int):
+async def fill(ctx, crncy: str=None, amnt: int=None):
     currency = crncy.lower()
 
     if amnt is None:
@@ -242,7 +245,7 @@ async def fill(ctx, crncy: str, amnt: int):
 
 @bot.command(name="give", description="Gibt einem User eine Währung.")
 @commands.check(lambda ctx: ctx.author.id in BOT_ADMINS)
-async def give(ctx, user: discord.Member, crncy: str, amnt: int):
+async def give(ctx, user: discord.Member=None, crncy: str=None, amnt: int=None):
     currency = crncy.lower()
 
     if user is None:
@@ -277,7 +280,7 @@ async def give(ctx, user: discord.Member, crncy: str, amnt: int):
 # warum ist er dann drinne? keine ahnung.
 @bot.command(name="reset", description="Setzt eine Währung eines Users zurück.")
 @commands.check(lambda ctx: ctx.author.id in BOT_ADMINS)
-async def give(ctx, user: discord.Member, crncy: str):
+async def give(ctx, user: discord.Member=None, crncy: str=None):
     currency = crncy.lower()
 
     if user is None:
@@ -369,7 +372,7 @@ async def bot_help(ctx):
     await ctx.author.send(cmds)
 
 @bot.command(name="transfer", description="Überträgt eine Währung von deinem Konto auf das eines anderen Users.")
-async def transfer(ctx, user: discord.Member, crncy: str, amnt: int):
+async def transfer(ctx, user: discord.Member=None, crncy: str=None, amnt: int=None):
     currency = crncy.lower()
     amnt = float(amnt)
 
@@ -413,7 +416,7 @@ async def transfer(ctx, user: discord.Member, crncy: str, amnt: int):
 
     total_debit = round(amnt, 2) # Überweisung
 
-    tax_amount_float = amnt * 0.1
+    tax_amount_float = amnt * BURNING_TAX_AMOUNT
     tax_amount = round(tax_amount_float, 2) # Geldvernichtungssteuer
 
     amount_received = round(amnt - tax_amount, 2) # Betrag an den Empfänger
@@ -434,7 +437,7 @@ async def transfer(ctx, user: discord.Member, crncy: str, amnt: int):
     save_all_files()
 
 @bot.command(name="exchange", description="Tauscht eine Währung basierend auf den aktuellen Kursen in eine andere Währung um.", aliases=["ex"])
-async def exchange(ctx, amnt: float, src: str, dest: str):
+async def exchange(ctx, amnt: float=None, src: str=None, dest: str=None):
 
     if amnt is None:
         await ctx.send("Du musst eine Anzahl angeben.")
@@ -447,8 +450,11 @@ async def exchange(ctx, amnt: float, src: str, dest: str):
     if src is None or dest is None:
         await ctx.send("Du musst zwei Währungen angeben.")
         return
+    
+    src_lower = src.lower()
+    dest_lower = dest.lower()
 
-    if src not in CURRENCIES or dest not in CURRENCIES:
+    if src_lower not in CURRENCIES or dest_lower not in CURRENCIES:
         await ctx.send("Diese Währung gibt es nicht.")
         return
 
@@ -463,18 +469,27 @@ async def exchange(ctx, amnt: float, src: str, dest: str):
         await ctx.send(f"Du hast ungenügend {CURRENCIES_DISPLAY[src]}.")
         return
 
-    dest_currency_amount = currency_to_currency(amnt, src, dest)
+    tax_amount = round(amnt * BURNING_TAX_AMOUNT, 2)
+    amount_after_tax = round(amnt - tax_amount, 2)
 
-    dicts["user_currencies"][user_id][src] -= amnt
-    dicts["user_currencies"][user_id][dest] += dest_currency_amount
+    dest_currency_amount = currency_to_currency(amount_after_tax, src_lower, dest_lower)
 
-    await ctx.send(f"Du hast erfolgreich {amnt} {CURRENCIES_DISPLAY[src]} in {dest_currency_amount} {CURRENCIES_DISPLAY[dest]} eingetauscht.")
+    dicts["user_currencies"][user_id][src_lower] -= amnt
+    dicts["user_currencies"][user_id][dest_lower] += dest_currency_amount
+    dicts["currency_totals"][src_lower] -= tax_amount
+
+    await ctx.send(
+        f"Du hast {amnt:.2f} {CURRENCIES_DISPLAY[src_lower]} umgetauscht.\n"
+        f"{amount_after_tax:.2f} {CURRENCIES_DISPLAY[src_lower]} wurden umgerechnet.\n"
+        f"Du erhältst {dest_currency_amount:.2f} {CURRENCIES_DISPLAY[dest_lower]}.\n"
+        f"{tax_amount:.2f} {CURRENCIES_DISPLAY[src_lower]} wurden aufgrund der Geldvernichtungssteuer vernichtet."
+    )
 
 
 # Glücksspielbefehle
 
 @bot.command(name="coinflip", description="Spielt eine Runde Coinflip.", aliases=["cf"])
-async def coinflip(ctx, bet: int, choice: str):
+async def coinflip(ctx, bet: int=None, choice: str=None):
     if bet is None:
         await ctx.send("Du musst einen Einsatz angeben.")
         return
@@ -509,7 +524,14 @@ async def coinflip(ctx, bet: int, choice: str):
     save_all_files()
 
 
-# TODO: muss hier noch errorhandler einbauen und oben überflüssige prüfungen (if X is None:) entfernen.
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.BadArgument):
+        await ctx.send(f"{error.param.name} ist ein falscher Typ (z.B. Text anstatt Zahl).")
+        return
+
+    if isinstance(error, commands.CommandNotFound):
+        return
 
 
 # --- Bot Start ---
