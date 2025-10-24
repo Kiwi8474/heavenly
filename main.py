@@ -213,7 +213,7 @@ async def on_ready():
 async def say(ctx, *, msg: str):
     await bot.get_channel(1393932918451081267).send(msg)
 
-@bot.command(name="shutdown", description="Schaltet den Bot aus.")
+@bot.command(name="shutdown", description="Startet den Bot neu.", aliases=["restart"])
 @commands.check(lambda ctx: ctx.author.id in BOT_ADMINS)
 async def shutdown(ctx):
     save_all_files()
@@ -221,7 +221,7 @@ async def shutdown(ctx):
 
 @bot.command(name="fill", description="Füllt den Pot.")
 @commands.check(lambda ctx: ctx.author.id in BOT_ADMINS)
-async def fill(ctx, crncy: str=None, amnt: int=None):
+async def fill(ctx, crncy: str=None, amnt: float=None):
     currency = crncy.lower()
 
     if amnt is None:
@@ -245,7 +245,7 @@ async def fill(ctx, crncy: str=None, amnt: int=None):
 
 @bot.command(name="give", description="Gibt einem User eine Währung.")
 @commands.check(lambda ctx: ctx.author.id in BOT_ADMINS)
-async def give(ctx, user: discord.Member=None, crncy: str=None, amnt: int=None):
+async def give(ctx, user: discord.Member=None, crncy: str=None, amnt: float=None):
     currency = crncy.lower()
 
     if user is None:
@@ -362,7 +362,7 @@ async def bot_help(ctx):
 
     cmds += "\n## Adminbefehle\n"
     cmds += "`say` : Lässt den Bot etwas sagen.\n"
-    cmds += "`shutdown` : Schaltet den Bot aus.\n"
+    cmds += "`shutdown / restart` : Startet den Bot neu.\n"
     cmds += "`fill` : Füllt den Pot.\n"
     cmds += "`give` : Gibt einem User eine Währung.\n"
     cmds += "`reset` : Setzt eine Währung eines Users zurück.\n"
@@ -373,7 +373,7 @@ async def bot_help(ctx):
     await ctx.author.send(cmds)
 
 @bot.command(name="transfer", description="Überträgt eine Währung von deinem Konto auf das eines anderen Users.")
-async def transfer(ctx, user: discord.Member=None, crncy: str=None, amnt: int=None):
+async def transfer(ctx, user: discord.Member=None, crncy: str=None, amnt: float=None):
     currency = crncy.lower()
     amnt = float(amnt)
 
@@ -503,7 +503,7 @@ async def contribute(ctx):
 # Glücksspielbefehle
 
 @bot.command(name="coinflip", description="Spielt eine Runde Coinflip.", aliases=["cf"])
-async def coinflip(ctx, bet: int=None, choice: str=None):
+async def coinflip(ctx, bet: float=None, choice: str=None):
     if bet is None:
         await ctx.send("Du musst einen Einsatz angeben.")
         return
