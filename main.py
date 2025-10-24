@@ -546,6 +546,9 @@ async def coinflip(ctx, bet: float=None, choice: str=None):
 
 # TODO: Glücksspiel "Slots" einbauen
 
+# TODO: Glücksspiel "Blackjack" einbauen
+
+
 # Globaler Errorhandler
 
 @bot.event
